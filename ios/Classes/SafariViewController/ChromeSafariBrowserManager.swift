@@ -32,18 +32,11 @@ public class ChromeSafariBrowserManager: NSObject, FlutterPlugin {
 
         switch call.method {
             case "open":
-                let uuid: String = arguments!["uuid"] as! String
+                let id: String = arguments!["id"] as! String
                 let url = arguments!["url"] as! String
                 let options = arguments!["options"] as! [String: Any?]
                 let menuItemList = arguments!["menuItemList"] as! [[String: Any]]
-                let uuidFallback = arguments!["uuidFallback"] as? String
-                let headersFallback = arguments!["headersFallback"] as? [String: String]
-                let optionsFallback = arguments!["optionsFallback"] as? [String: Any?]
-                let contextMenuFallback = arguments!["contextMenuFallback"] as? [String: Any]
-                let windowIdFallback = arguments!["windowIdFallback"] as? Int64
-                open(uuid: uuid, url: url, options: options,  menuItemList: menuItemList, uuidFallback: uuidFallback,
-                     headersFallback: headersFallback, optionsFallback: optionsFallback, contextMenuFallback: contextMenuFallback,
-                     windowIdFallback: windowIdFallback, result: result)
+                open(id: id, url: url, options: options,  menuItemList: menuItemList, result: result)
                 break
             case "isAvailable":
                 if #available(iOS 9.0, *) {
@@ -58,14 +51,14 @@ public class ChromeSafariBrowserManager: NSObject, FlutterPlugin {
         }
     }
     
-    public func open(uuid: String, url: String, options: [String: Any?], menuItemList: [[String: Any]], uuidFallback: String?,
-                     headersFallback: [String: String]?, optionsFallback: [String: Any?]?, contextMenuFallback: [String: Any]?,
-                     windowIdFallback: Int64?, result: @escaping FlutterResult) {
+    public func open(id: String, url: String, options: [String: Any?], menuItemList: [[String: Any]], result: @escaping FlutterResult) {
         let absoluteUrl = URL(string: url)!.absoluteURL
         
         if #available(iOS 9.0, *) {
             
-            if let flutterViewController = UIApplication.shared.delegate?.window.unsafelyUnwrapped?.rootViewController as? FlutterViewController {
+            if let flutterViewController = UIApplication.shared.delegate?.window.unsafelyUnwrapped?.rootViewController {
+                // flutterViewController could be casted to FlutterViewController if needed
+                
                 let safariOptions = SafariBrowserOptions()
                 let _ = safariOptions.parse(options: options)
                 
@@ -82,7 +75,7 @@ public class ChromeSafariBrowserManager: NSObject, FlutterPlugin {
                     safari = SafariViewController(url: absoluteUrl)
                 }
                 
-                safari.uuid = uuid
+                safari.id = id
                 safari.menuItemList = menuItemList
                 safari.prepareMethodChannel()
                 safari.delegate = safari
@@ -95,14 +88,7 @@ public class ChromeSafariBrowserManager: NSObject, FlutterPlugin {
             }
             return
         }
-        else {
-            if uuidFallback == nil {
-                print("No WebView fallback declared.")
-                result(true)
-                
-                return
-            }
-            SwiftFlutterPlugin.instance!.inAppBrowserManager!.openUrl(uuid: uuidFallback!, url: url, options: optionsFallback ?? [:], headers: headersFallback ?? [:], contextMenu: contextMenuFallback ?? [:], windowId: windowIdFallback)
-        }
+        
+        result(FlutterError.init(code: "ChromeSafariBrowserManager", message: "SafariViewController is not available!", details: nil))
     }
 }
