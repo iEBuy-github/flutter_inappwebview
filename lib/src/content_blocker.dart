@@ -42,7 +42,7 @@ class ContentBlockerTrigger {
 
   ///A list of [ContentBlockerTriggerResourceType] representing the resource types (how the browser intends to use the resource) that the rule should match.
   ///If not specified, the rule matches all resource types.
-  late List<ContentBlockerTriggerResourceType?> resourceType;
+  List<ContentBlockerTriggerResourceType?>? resourceType;
 
   ///A list of strings matched to a URL's domain; limits action to a list of specific domains.
   ///Values must be lowercase ASCII, or punycode for non-ASCII. Add * in front to match domain and subdomains. Can't be used with [ContentBlockerTrigger.unlessDomain].
@@ -53,7 +53,7 @@ class ContentBlockerTrigger {
   List<String>? unlessDomain;
 
   ///A list of [ContentBlockerTriggerLoadType] that can include one of two mutually exclusive values. If not specified, the rule matches all load types.
-  late List<ContentBlockerTriggerLoadType?> loadType;
+  List<ContentBlockerTriggerLoadType?>? loadType;
 
   ///A list of strings matched to the entire main document URL; limits the action to a specific list of URL patterns.
   ///Values must be lowercase ASCII, or punycode for non-ASCII. Can't be used with [ContentBlockerTrigger.unlessTopUrl].
@@ -80,7 +80,7 @@ class ContentBlockerTrigger {
     this.unlessDomain = unlessDomain;
     assert(!(this.ifDomain!.isEmpty || this.unlessDomain!.isEmpty) == false);
     this.loadType = loadType;
-    assert(this.loadType.length <= 2);
+    assert(this.loadType!.length <= 2);
     this.ifTopUrl = ifTopUrl;
     this.unlessTopUrl = unlessTopUrl;
     assert(!(this.ifTopUrl!.isEmpty || this.unlessTopUrl!.isEmpty) == false);
@@ -88,11 +88,11 @@ class ContentBlockerTrigger {
 
   Map<String, dynamic> toMap() {
     List<String> resourceTypeStringList = [];
-    resourceType.forEach((type) {
+    resourceType?.forEach((type) {
       resourceTypeStringList.add(type!.toValue());
     });
     List<String> loadTypeStringList = [];
-    loadType.forEach((type) {
+    loadType?.forEach((type) {
       loadTypeStringList.add(type!.toValue());
     });
 

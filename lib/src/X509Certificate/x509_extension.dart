@@ -39,7 +39,7 @@ class X509Extension {
 
   List<String> get valueAsStrings {
     var result = <String>[];
-    late var sub;
+    var sub;
     try {
       sub = block!.sub?.last.sub?.last.sub ?? <ASN1Object>[];
     } catch (e) {}

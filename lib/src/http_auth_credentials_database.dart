@@ -33,11 +33,12 @@ class HttpAuthCredentialDatabase {
       getAllAuthCredentials() async {
     Map<String, dynamic> args = <String, dynamic>{};
     List<dynamic> allCredentials =
-        await (_channel.invokeMethod('getAllAuthCredentials', args) as FutureOr<List<dynamic>>);
+        await _channel.invokeMethod('getAllAuthCredentials', args);
 
     List<ProtectionSpaceHttpAuthCredentials> result = [];
 
-    for (Map<dynamic, dynamic> map in allCredentials as Iterable<Map<dynamic, dynamic>>) {
+    for (Map<dynamic, dynamic> map
+        in allCredentials as Iterable<Map<dynamic, dynamic>>) {
       Map<dynamic, dynamic> protectionSpace = map["protectionSpace"];
       List<dynamic> credentials = map["credentials"];
       result.add(ProtectionSpaceHttpAuthCredentials(
@@ -64,9 +65,10 @@ class HttpAuthCredentialDatabase {
     args.putIfAbsent("realm", () => protectionSpace.realm);
     args.putIfAbsent("port", () => protectionSpace.port);
     List<dynamic> credentialList =
-        await (_channel.invokeMethod('getHttpAuthCredentials', args) as FutureOr<List<dynamic>>);
+        await _channel.invokeMethod('getHttpAuthCredentials', args);
     List<HttpAuthCredential> credentials = [];
-    for (Map<dynamic, dynamic> credential in credentialList as Iterable<Map<dynamic, dynamic>>) {
+    for (Map<dynamic, dynamic> credential
+        in credentialList as Iterable<Map<dynamic, dynamic>>) {
       credentials.add(HttpAuthCredential(
           username: credential["username"], password: credential["password"]));
     }

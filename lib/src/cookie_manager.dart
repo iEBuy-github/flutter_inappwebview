@@ -72,7 +72,7 @@ class CookieManager {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent('url', () => url);
     List<dynamic> cookieListMap =
-        await (_channel.invokeMethod('getCookies', args) as FutureOr<List<dynamic>>);
+        await _channel.invokeMethod('getCookies', args);
     cookieListMap = cookieListMap.cast<Map<dynamic, dynamic>>();
 
     List<Cookie> cookies = [];
@@ -93,14 +93,13 @@ class CookieManager {
   }
 
   ///Gets a cookie by its [name] for the given [url].
-  Future<Cookie?> getCookie(
-      {required String url, required String name}) async {
+  Future<Cookie?> getCookie({required String url, required String name}) async {
     assert(url != null && url.isNotEmpty);
     assert(name != null && name.isNotEmpty);
 
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent('url', () => url);
-    List<dynamic> cookies = await (_channel.invokeMethod('getCookies', args) as FutureOr<List<dynamic>>);
+    List<dynamic> cookies = await _channel.invokeMethod('getCookies', args);
     cookies = cookies.cast<Map<dynamic, dynamic>?>();
     for (var i = 0; i < cookies.length; i++) {
       cookies[i] = cookies[i].cast<String, dynamic>();

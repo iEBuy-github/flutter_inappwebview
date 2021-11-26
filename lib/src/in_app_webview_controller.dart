@@ -972,14 +972,14 @@ class InAppWebViewController {
 
     InAppWebViewGroupOptions? options = await getOptions();
     if (options != null && options.crossPlatform!.javaScriptEnabled == true) {
-      html = await (evaluateJavascript(
-              source:
-                  "window.document.getElementsByTagName('html')[0].outerHTML;")
-          as FutureOr<String?>);
+      html = await evaluateJavascript(
+          source: "window.document.getElementsByTagName('html')[0].outerHTML;");
       if (html != null && html.isNotEmpty) return html;
     }
 
-    var webviewUrl = await (getUrl() as FutureOr<String>);
+    var webviewUrl = await getUrl();
+    if (webviewUrl == null) return html;
+
     if (webviewUrl.startsWith("file:///")) {
       var assetPathSplitted = webviewUrl.split("/flutter_assets/");
       var assetPath = assetPathSplitted[assetPathSplitted.length - 1];
@@ -989,8 +989,8 @@ class InAppWebViewController {
       } catch (e) {}
     } else {
       HttpClient client = new HttpClient();
-      var url = Uri.parse(webviewUrl);
       try {
+        var url = Uri.parse(webviewUrl);
         var htmlRequest = await client.getUrl(url);
         html =
             await (await htmlRequest.close()).transform(Utf8Decoder()).join();
@@ -1006,7 +1006,7 @@ class InAppWebViewController {
     List<Favicon> favicons = [];
 
     HttpClient client = new HttpClient();
-    var webviewUrl = await (getUrl() as FutureOr<String>);
+    var webviewUrl = await getUrl() ?? '';
     var url = (webviewUrl.startsWith("file:///"))
         ? Uri.file(webviewUrl)
         : Uri.parse(webviewUrl);
@@ -1083,7 +1083,7 @@ class InAppWebViewController {
 
     // try to get the manifest file
     HttpClientRequest manifestRequest;
-    late HttpClientResponse manifestResponse;
+    HttpClientResponse? manifestResponse;
     bool manifestFound = false;
     if (manifestUrl == null) {
       manifestUrl = url.scheme + "://" + url.host + "/manifest.json";
@@ -1100,7 +1100,7 @@ class InAppWebViewController {
 
     if (manifestFound) {
       Map<String, dynamic> manifest =
-          json.decode(await manifestResponse.transform(Utf8Decoder()).join());
+          json.decode(await manifestResponse!.transform(Utf8Decoder()).join());
       if (manifest.containsKey("icons")) {
         for (Map<String, dynamic> icon in manifest["icons"]) {
           favicons.addAll(_createFavicons(url, assetPathBase, icon["src"],
@@ -1531,8 +1531,7 @@ class InAppWebViewController {
   Future<WebHistory> getCopyBackForwardList() async {
     Map<String, dynamic> args = <String, dynamic>{};
     Map<dynamic, dynamic> result =
-        await (_channel!.invokeMethod('getCopyBackForwardList', args)
-            as FutureOr<Map<dynamic, dynamic>>);
+        await _channel!.invokeMethod('getCopyBackForwardList', args);
     result = result.cast<String, dynamic>();
 
     List<dynamic> historyListMap = result["history"];
@@ -1975,7 +1974,7 @@ class InAppWebViewController {
 
 ///InAppWebViewControllerAndroid class represents the Android controller that contains only android-specific methods for the WebView.
 class AndroidInAppWebViewController {
-  late InAppWebViewController _controller;
+  InAppWebViewController? _controller;
 
   AndroidInAppWebViewController(InAppWebViewController controller) {
     assert(controller != null);
@@ -1995,7 +1994,7 @@ class AndroidInAppWebViewController {
   ///**Official Android API**: https://developer.android.com/reference/android/webkit/WebView#startSafeBrowsing(android.content.Context,%20android.webkit.ValueCallback%3Cjava.lang.Boolean%3E)
   Future<bool?> startSafeBrowsing() async {
     Map<String, dynamic> args = <String, dynamic>{};
-    return await _controller._channel!.invokeMethod('startSafeBrowsing', args);
+    return await _controller?._channel!.invokeMethod('startSafeBrowsing', args);
   }
 
   ///Clears the SSL preferences table stored in response to proceeding with SSL certificate errors.
@@ -2003,7 +2002,7 @@ class AndroidInAppWebViewController {
   ///**Official Android API**: https://developer.android.com/reference/android/webkit/WebView#clearSslPreferences()
   Future<void> clearSslPreferences() async {
     Map<String, dynamic> args = <String, dynamic>{};
-    await _controller._channel!.invokeMethod('clearSslPreferences', args);
+    await _controller?._channel!.invokeMethod('clearSslPreferences', args);
   }
 
   ///Does a best-effort attempt to pause any processing that can be paused safely, such as animations and geolocation. Note that this call does not pause JavaScript.
@@ -2012,7 +2011,7 @@ class AndroidInAppWebViewController {
   ///**Official Android API**: https://developer.android.com/reference/android/webkit/WebView#onPause()
   Future<void> pause() async {
     Map<String, dynamic> args = <String, dynamic>{};
-    await _controller._channel!.invokeMethod('pause', args);
+    await _controller?._channel!.invokeMethod('pause', args);
   }
 
   ///Resumes a WebView after a previous call to [pause()].
@@ -2020,7 +2019,7 @@ class AndroidInAppWebViewController {
   ///**Official Android API**: https://developer.android.com/reference/android/webkit/WebView#onResume()
   Future<void> resume() async {
     Map<String, dynamic> args = <String, dynamic>{};
-    await _controller._channel!.invokeMethod('resume', args);
+    await _controller?._channel!.invokeMethod('resume', args);
   }
 
   ///Gets the URL that was originally requested for the current page.
@@ -2030,7 +2029,7 @@ class AndroidInAppWebViewController {
   ///**Official Android API**: https://developer.android.com/reference/android/webkit/WebView#getOriginalUrl()
   Future<String?> getOriginalUrl() async {
     Map<String, dynamic> args = <String, dynamic>{};
-    return await _controller._channel!.invokeMethod('getOriginalUrl', args);
+    return await _controller?._channel!.invokeMethod('getOriginalUrl', args);
   }
 
   ///Scrolls the contents of this WebView down by half the page size.
@@ -2043,7 +2042,7 @@ class AndroidInAppWebViewController {
     assert(bottom != null);
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("bottom", () => bottom);
-    return await _controller._channel!.invokeMethod('pageDown', args);
+    return await _controller?._channel!.invokeMethod('pageDown', args);
   }
 
   ///Scrolls the contents of this WebView up by half the view size.
@@ -2056,7 +2055,7 @@ class AndroidInAppWebViewController {
     assert(top != null);
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("top", () => top);
-    return await _controller._channel!.invokeMethod('pageUp', args);
+    return await _controller?._channel!.invokeMethod('pageUp', args);
   }
 
   ///Saves the current WebView as a web archive.
@@ -2074,7 +2073,7 @@ class AndroidInAppWebViewController {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("basename", () => basename);
     args.putIfAbsent("autoname", () => autoname);
-    return await _controller._channel!.invokeMethod('saveWebArchive', args);
+    return await _controller?._channel!.invokeMethod('saveWebArchive', args);
   }
 
   ///Performs zoom in in this WebView.
@@ -2083,7 +2082,7 @@ class AndroidInAppWebViewController {
   ///**Official Android API**: https://developer.android.com/reference/android/webkit/WebView#zoomIn()
   Future<bool?> zoomIn() async {
     Map<String, dynamic> args = <String, dynamic>{};
-    return await _controller._channel!.invokeMethod('zoomIn', args);
+    return await _controller?._channel!.invokeMethod('zoomIn', args);
   }
 
   ///Performs zoom out in this WebView.
@@ -2092,7 +2091,7 @@ class AndroidInAppWebViewController {
   ///**Official Android API**: https://developer.android.com/reference/android/webkit/WebView#zoomOut()
   Future<bool?> zoomOut() async {
     Map<String, dynamic> args = <String, dynamic>{};
-    return await _controller._channel!.invokeMethod('zoomOut', args);
+    return await _controller?._channel!.invokeMethod('zoomOut', args);
   }
 
   ///Clears the internal back/forward list.
@@ -2100,7 +2099,7 @@ class AndroidInAppWebViewController {
   ///**Official Android API**: https://developer.android.com/reference/android/webkit/WebView#clearHistory()
   Future<void> clearHistory() async {
     Map<String, dynamic> args = <String, dynamic>{};
-    return await _controller._channel!.invokeMethod('clearHistory', args);
+    return await _controller?._channel!.invokeMethod('clearHistory', args);
   }
 
   ///Clears the client certificate preferences stored in response to proceeding/cancelling client cert requests.
@@ -2178,7 +2177,7 @@ class AndroidInAppWebViewController {
 
 ///InAppWebViewControllerIOS class represents the iOS controller that contains only ios-specific methods for the WebView.
 class IOSInAppWebViewController {
-  late InAppWebViewController _controller;
+  InAppWebViewController? _controller;
 
   IOSInAppWebViewController(InAppWebViewController controller) {
     assert(controller != null);
@@ -2190,7 +2189,7 @@ class IOSInAppWebViewController {
   ///**Official iOS API**: https://developer.apple.com/documentation/webkit/wkwebview/1414956-reloadfromorigin
   Future<void> reloadFromOrigin() async {
     Map<String, dynamic> args = <String, dynamic>{};
-    await _controller._channel!.invokeMethod('reloadFromOrigin', args);
+    await _controller?._channel!.invokeMethod('reloadFromOrigin', args);
   }
 
   ///A Boolean value indicating whether all resources on the page have been loaded over securely encrypted connections.
@@ -2198,7 +2197,7 @@ class IOSInAppWebViewController {
   ///**Official iOS API**: https://developer.apple.com/documentation/webkit/wkwebview/1415002-hasonlysecurecontent
   Future<bool?> hasOnlySecureContent() async {
     Map<String, dynamic> args = <String, dynamic>{};
-    return await _controller._channel!
+    return await _controller?._channel!
         .invokeMethod('hasOnlySecureContent', args);
   }
 }

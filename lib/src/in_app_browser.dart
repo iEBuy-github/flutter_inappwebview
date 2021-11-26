@@ -27,7 +27,7 @@ class InAppBrowser {
       const MethodChannel('com.pichillilorenzo/flutter_inappbrowser');
 
   /// WebView Controller that can be used to access the [InAppWebViewController] API.
-  late InAppWebViewController webViewController;
+  InAppWebViewController? webViewController;
 
   ///The window id of a [CreateWindowRequest.windowId].
   final int? windowId;
@@ -54,7 +54,7 @@ class InAppBrowser {
         onExit();
         break;
       default:
-        return webViewController.handleMethod(call);
+        return webViewController?.handleMethod(call);
     }
   }
 

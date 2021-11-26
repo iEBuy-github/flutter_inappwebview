@@ -15,7 +15,7 @@ class ChromeSafariBrowser {
   InAppBrowser? browserFallback;
   Map<int, ChromeSafariBrowserMenuItem> _menuItems = new HashMap();
   bool _isOpened = false;
-  late MethodChannel _channel;
+  MethodChannel? _channel;
   static const MethodChannel _sharedChannel =
       const MethodChannel('com.pichillilorenzo/flutter_chromesafaribrowser');
 
@@ -25,7 +25,7 @@ class ChromeSafariBrowser {
     browserFallback = bFallback;
     this._channel =
         MethodChannel('com.pichillilorenzo/flutter_chromesafaribrowser_$uuid');
-    this._channel.setMethodCallHandler(handleMethod);
+    this._channel!.setMethodCallHandler(handleMethod);
     _isOpened = false;
   }
 
@@ -93,7 +93,7 @@ class ChromeSafariBrowser {
   ///Closes the [ChromeSafariBrowser] instance.
   Future<void> close() async {
     Map<String, dynamic> args = <String, dynamic>{};
-    await _channel.invokeMethod("close", args);
+    await _channel?.invokeMethod("close", args);
   }
 
   ///Adds a [ChromeSafariBrowserMenuItem] to the menu.

@@ -12,8 +12,8 @@ import 'asn1_distinguished_names.dart';
 ///Class that represents a X.509 certificate.
 ///This provides a standard way to access all the attributes of an X.509 certificate.
 class X509Certificate {
-  late List<ASN1Object> asn1;
-  late ASN1Object block1;
+  List<ASN1Object>? asn1;
+  ASN1Object? block1;
 
   ///Returns the encoded form of this certificate. It is
   ///assumed that each certificate type would have only a single
@@ -96,7 +96,7 @@ class X509Certificate {
   }
 
   String get description =>
-      asn1.fold("", (value, element) => value + element.description! + "\n");
+      asn1!.fold("", (value, element) => value + element.description! + "\n");
 
   ///Checks that the given date is within the certificate's validity period.
   bool checkValidity({DateTime? date}) {
@@ -111,7 +111,7 @@ class X509Certificate {
 
   ///Gets the version (version number) value from the certificate.
   int? get version {
-    var v = firstLeafValue(block: block1) as List<int>?;
+    var v = firstLeafValue(block: block1!) as List<int>?;
     if (v != null) {
       var index = toIntValue(v);
       if (index != null) {
@@ -123,11 +123,11 @@ class X509Certificate {
 
   ///Gets the serialNumber value from the certificate.
   List<int>? get serialNumber =>
-      block1.atIndex(X509BlockPosition.serialNumber)?.value as List<int>?;
+      block1?.atIndex(X509BlockPosition.serialNumber)?.value as List<int>?;
 
   ///Returns the issuer (issuer distinguished name) value from the certificate as a String.
   String? get issuerDistinguishedName {
-    var issuerBlock = block1.atIndex(X509BlockPosition.issuer);
+    var issuerBlock = block1?.atIndex(X509BlockPosition.issuer);
     if (issuerBlock != null) {
       return blockDistinguishedName(block: issuerBlock);
     }
@@ -136,7 +136,7 @@ class X509Certificate {
 
   List<String> get issuerOIDs {
     var result = <String>[];
-    var issuerBlock = block1.atIndex(X509BlockPosition.issuer);
+    var issuerBlock = block1?.atIndex(X509BlockPosition.issuer);
     if (issuerBlock != null) {
       for (var sub in (issuerBlock.sub ?? <ASN1Object>[])) {
         var value = firstLeafValue(block: sub) as String?;
@@ -153,7 +153,7 @@ class X509Certificate {
       oid = dn.oid();
     }
     if (oid != null) {
-      var issuerBlock = block1.atIndex(X509BlockPosition.issuer);
+      var issuerBlock = block1?.atIndex(X509BlockPosition.issuer);
       if (issuerBlock != null) {
         var oidBlock = issuerBlock.findOid(oidValue: oid);
         if (oidBlock != null) {
@@ -171,7 +171,7 @@ class X509Certificate {
 
   ///Returns the subject (subject distinguished name) value from the certificate as a String.
   String? get subjectDistinguishedName {
-    var subjectBlock = block1.atIndex(X509BlockPosition.subject);
+    var subjectBlock = block1?.atIndex(X509BlockPosition.subject);
     if (subjectBlock != null) {
       return blockDistinguishedName(block: subjectBlock);
     }
@@ -180,7 +180,7 @@ class X509Certificate {
 
   List<String> get subjectOIDs {
     var result = <String>[];
-    var subjectBlock = block1.atIndex(X509BlockPosition.subject);
+    var subjectBlock = block1?.atIndex(X509BlockPosition.subject);
     if (subjectBlock != null) {
       for (var sub in (subjectBlock.sub ?? <ASN1Object>[])) {
         var value = firstLeafValue(block: sub) as String?;
@@ -197,7 +197,7 @@ class X509Certificate {
       oid = dn.oid();
     }
     if (oid != null) {
-      var subjectBlock = block1.atIndex(X509BlockPosition.subject);
+      var subjectBlock = block1?.atIndex(X509BlockPosition.subject);
       if (subjectBlock != null) {
         var oidBlock = subjectBlock.findOid(oidValue: oid);
         if (oidBlock != null) {
@@ -215,27 +215,27 @@ class X509Certificate {
 
   ///Gets the notBefore date from the validity period of the certificate.
   DateTime? get notBefore =>
-      block1.atIndex(X509BlockPosition.dateValidity)?.subAtIndex(0)?.value
+      block1?.atIndex(X509BlockPosition.dateValidity)?.subAtIndex(0)?.value
           as DateTime?;
 
   ///Gets the notAfter date from the validity period of the certificate.
   DateTime? get notAfter {
     var value = block1
-        .atIndex(X509BlockPosition.dateValidity)
+        ?.atIndex(X509BlockPosition.dateValidity)
         ?.subAtIndex(1)
         ?.value as DateTime?;
     return value;
   }
 
   ///Gets the signature value (the raw signature bits) from the certificate.
-  List<int>? get signature => asn1[0].subAtIndex(2)?.value as List<int>?;
+  List<int>? get signature => asn1?[0].subAtIndex(2)?.value as List<int>?;
 
   ///Gets the signature algorithm name for the certificate signature algorithm.
   String? get sigAlgName => OID.fromValue(sigAlgOID ?? "")?.name();
 
   ///Gets the signature algorithm OID string from the certificate.
   String? get sigAlgOID =>
-      block1.subAtIndex(2)?.subAtIndex(0)?.value as String?;
+      block1?.subAtIndex(2)?.subAtIndex(0)?.value as String?;
 
   ///Gets the DER-encoded signature algorithm parameters from this certificate's signature algorithm.
   List<int>? get sigAlgParams => null;
@@ -256,7 +256,7 @@ class X509Certificate {
   ///```
   List<bool> get keyUsage {
     var result = <bool>[];
-    var oidBlock = block1.findOid(oid: OID.keyUsage);
+    var oidBlock = block1?.findOid(oid: OID.keyUsage);
     if (oidBlock != null) {
       var sub = oidBlock.parent?.sub;
       if (sub != null && sub.length > 0) {
@@ -286,7 +286,7 @@ class X509Certificate {
 
   ///Gets the informations of the public key from this certificate.
   X509PublicKey? get publicKey {
-    var pkBlock = block1.atIndex(X509BlockPosition.publicKey);
+    var pkBlock = block1?.atIndex(X509BlockPosition.publicKey);
     if (pkBlock != null) {
       return X509PublicKey(pkBlock: pkBlock);
     }
@@ -398,7 +398,7 @@ class X509Certificate {
   }
 
   List<ASN1Object>? get extensionBlocks =>
-      block1.atIndex(X509BlockPosition.extensions)?.subAtIndex(0)?.sub;
+      block1?.atIndex(X509BlockPosition.extensions)?.subAtIndex(0)?.sub;
 
   ///Gets the extension information of the given OID code or enum string value.
   X509Extension? extensionObject({String? oidValue, OID? oid}) {
@@ -407,7 +407,7 @@ class X509Certificate {
     }
     if (oidValue != null) {
       var block = block1
-          .atIndex(X509BlockPosition.extensions)
+          ?.atIndex(X509BlockPosition.extensions)
           ?.findOid(oidValue: oidValue)
           ?.parent;
       if (block != null) {
